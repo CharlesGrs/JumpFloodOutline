@@ -1,0 +1,10 @@
+{
+  "name": "com.jumpflood.outline",
+  "description": "Outline Render Feature using the Jump Flood algorithm",
+  "version": "0.1.0",
+  "unity": "2020.3",
+  "displayName": "JumpFloodOutline",
+  "dependencies": {
+    "com.unity.render-pipelines.universal": "10.x.x"
+  }
+}
