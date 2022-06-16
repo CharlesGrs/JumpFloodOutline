@@ -4,6 +4,7 @@ Shader "Unlit/JumpFloodOutline"
     {
         [HideInInspector]_MainTex ("Texture", 2D) = "white" {}
         _OutlineColor("Outline Color", color) = (0,0,0,0)
+        [Toggle]_EnableAA("EnableAA", float) = 0
     }
     SubShader
     {
@@ -78,8 +79,6 @@ Shader "Unlit/JumpFloodOutline"
 
 
                 return bestDist != 999 ? float4(bestCoord, 0, bestDepth) : float4(0, 0, 1, 0);
-                return distance(bestCoord, i.screenPos);;
-                return bestDist != 100 ? float4(bestCoord, 0, 1) : float4(0, 0, 1, 0);
             }
             ENDCG
         }
@@ -112,7 +111,7 @@ Shader "Unlit/JumpFloodOutline"
             float4 _MainTex_ST;
             float4 _MainTex_TexelSize;
 
-            float _StepSize;
+            float _StepSize,_EnableAA;
 
             v2f vert(appdata v)
             {
@@ -143,7 +142,7 @@ Shader "Unlit/JumpFloodOutline"
 
                 // float isBehind = encodedDepth > distance(worldPos, _WorldSpaceCameraPos);
                 float depthDiff = encodedDepth - distance(worldPos, _WorldSpaceCameraPos);
-                depthDiff = saturate(depthDiff *4);
+                depthDiff = saturate(depthDiff *.2);
 
                 float distanceField = distance(col.rg, i.vertex.xy / _ScreenParams.xy) * (col.b == 0);
                 float outsideMask = step(.00109, distanceField);
@@ -151,13 +150,13 @@ Shader "Unlit/JumpFloodOutline"
                 float innerAA = smoothstep(0, .005, distanceField);
 
                 float a = 0.006;
-                float aa = 1 - smoothstep(a, a + .0015, distanceField);
+                float aa = 1 - smoothstep(a, a + .0035, distanceField);
                 aa = pow(aa, 2);
-                
 
+                aa *= innerAA;
+                aa = _EnableAA ? aa : step(0.01,aa);
                 
-                
-                col2 += lerp( 1 - _OutlineColor, _OutlineColor, depthDiff) * outsideMask * aa * innerAA;
+                col2 += lerp( 1 - _OutlineColor, _OutlineColor, depthDiff) * outsideMask * aa ;
                 return col2;
                 return lerp(col2, _OutlineColor, outsideMask * aa);
             }
