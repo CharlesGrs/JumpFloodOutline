@@ -30,6 +30,7 @@ public class OutlineFeature : ScriptableRendererFeature
 
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
+            // cameraTextureDescriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_SRGB;
             cmd.GetTemporaryRT(jumpFloodRT.id, cameraTextureDescriptor);
             cmd.GetTemporaryRT(tempA.id, cameraTextureDescriptor);
             cmd.GetTemporaryRT(tempB.id, cameraTextureDescriptor);
@@ -50,7 +51,7 @@ public class OutlineFeature : ScriptableRendererFeature
              // cmd.Blit(tempA.id,source);
 
 
-             float[] d = {256, 128, 64, 32, 16, 8, 4, 2, 1};
+             float[] d = { 16, 8, 4, 2, 1};
              for (int i = 0; i < d.Length; i++)
              {
                  cmd.SetGlobalFloat("_StepSize", d[i] + .5f);
