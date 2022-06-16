@@ -129,9 +129,7 @@ Shader "Unlit/JumpFloodOutline"
             {
                 float4 col = tex2D(_JumpFloodRT, i.uv);
                 float4 col2 = tex2D(_MainTex, i.uv);
-
                 float encodedDepth = col.a;
-
 
                 float2 UV = i.vertex.xy / _ScaledScreenParams.xy;
 
@@ -140,11 +138,12 @@ Shader "Unlit/JumpFloodOutline"
                 #else
                     real depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(UV));
                 #endif
+                
                 float3 worldPos = ComputeWorldSpacePosition(UV, depth, UNITY_MATRIX_I_VP);
 
                 // float isBehind = encodedDepth > distance(worldPos, _WorldSpaceCameraPos);
                 float depthDiff = encodedDepth - distance(worldPos, _WorldSpaceCameraPos);
-                depthDiff = saturate(depthDiff * .001);
+                depthDiff = saturate(depthDiff *4);
 
                 float distanceField = distance(col.rg, i.vertex.xy / _ScreenParams.xy) * (col.b == 0);
                 float outsideMask = step(.00109, distanceField);
@@ -154,11 +153,11 @@ Shader "Unlit/JumpFloodOutline"
                 float a = 0.006;
                 float aa = 1 - smoothstep(a, a + .0015, distanceField);
                 aa = pow(aa, 2);
+                
 
-                // aa = 1;
-
-                // outline -= outline2;
-                col2 += lerp(.5 * 1 - _OutlineColor, _OutlineColor, depthDiff) * outsideMask * aa * innerAA;
+                
+                
+                col2 += lerp( 1 - _OutlineColor, _OutlineColor, depthDiff) * outsideMask * aa * innerAA;
                 return col2;
                 return lerp(col2, _OutlineColor, outsideMask * aa);
             }
