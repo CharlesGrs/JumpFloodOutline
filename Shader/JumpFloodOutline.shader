@@ -5,6 +5,7 @@ Shader "Unlit/JumpFloodOutline"
         [HideInInspector]_MainTex ("Texture", 2D) = "white" {}
         _OutlineColor("Outline Color", color) = (0,0,0,0)
         [Toggle]_EnableAA("EnableAA", float) = 0
+        
     }
     SubShader
     {
@@ -142,7 +143,8 @@ Shader "Unlit/JumpFloodOutline"
 
                 // float isBehind = encodedDepth > distance(worldPos, _WorldSpaceCameraPos);
                 float depthDiff = encodedDepth - distance(worldPos, _WorldSpaceCameraPos);
-                depthDiff = saturate(depthDiff *.2);
+
+                depthDiff = saturate(depthDiff *100);
 
                 float distanceField = distance(col.rg, i.vertex.xy / _ScreenParams.xy) * (col.b == 0);
                 float outsideMask = step(.00109, distanceField);

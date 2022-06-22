@@ -30,7 +30,7 @@ public class OutlineFeature : ScriptableRendererFeature
 
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
-            // cameraTextureDescriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_SRGB;
+           cameraTextureDescriptor.graphicsFormat = GraphicsFormat.R16G16B16A16_SFloat;
             cmd.GetTemporaryRT(jumpFloodRT.id, cameraTextureDescriptor);
             cmd.GetTemporaryRT(tempA.id, cameraTextureDescriptor);
             cmd.GetTemporaryRT(tempB.id, cameraTextureDescriptor);
@@ -83,8 +83,6 @@ public class OutlineFeature : ScriptableRendererFeature
             cmd.ReleaseTemporaryRT(tempB.id);
             cmd.ReleaseTemporaryRT(tempC.id);
             cmd.ReleaseTemporaryRT(jumpFloodRT.id);
-            
-
         }
     }
 

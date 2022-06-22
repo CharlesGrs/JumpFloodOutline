@@ -37,6 +37,8 @@ public class JumpFloodInitFeature : ScriptableRendererFeature
 
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
+            cameraTextureDescriptor.depthBufferBits = 0;
+            cameraTextureDescriptor.graphicsFormat = GraphicsFormat.R16G16B16A16_SFloat;
             cmd.GetTemporaryRT(jumpFloodRT.id, cameraTextureDescriptor);
             ConfigureTarget(jumpFloodRT.id);
             ConfigureClear(ClearFlag.All, Color.blue);

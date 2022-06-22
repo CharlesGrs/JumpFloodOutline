@@ -49,7 +49,7 @@ Shader "Unlit/JumpFloodInit"
                     real depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(UV));
                 #endif
 
-                float encodedDepth = distance(i.wPos, _WorldSpaceCameraPos) ;
+                float encodedDepth = distance(i.wPos, _WorldSpaceCameraPos)  ;
                 return float4(i.vertex.xy / _ScreenParams.xy, 0, encodedDepth);
             }
             ENDHLSL
