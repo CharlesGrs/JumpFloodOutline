@@ -3,9 +3,19 @@ Shader "Unlit/JumpFloodOutline"
     Properties
     {
         [HideInInspector]_MainTex ("Texture", 2D) = "white" {}
-        _OutlineColor("Outline Color", color) = (0,0,0,0)
-        [Toggle]_EnableAA("EnableAA", float) = 0
+        [HDR]_OutlineColor("Outline Color", color) = (0,0,0,0)
+        [HDR]_OutlineColorInsideObject("Outline Color Inside Object", color) = (0,0,0,0)
+
+        [Header(Size)][Space]
+        _OutlineSickness("OutlineSickness", Range(0.1,0.0000)) = 0.005
+        _OutlineAA("OutlineAA", Range(0.1,0.0001)) = 0.01
+
         
+        [Header(Distance FallOff)][Space]
+        _DistanceMax("DistanceMax", float) = 200
+        _DistancePow("DistancePow", float) = 2
+        _MinSizeDistanceFactor("Distance Size Factor", range(0,1)) = 0.1
+
     }
     SubShader
     {
@@ -108,11 +118,15 @@ Shader "Unlit/JumpFloodOutline"
 
             sampler2D _MainTex;
             sampler2D _JumpFloodRT;
-            float4 _OutlineColor;
+            float4 _OutlineColor, _OutlineColorInsideObject;
             float4 _MainTex_ST;
             float4 _MainTex_TexelSize;
 
-            float _StepSize,_EnableAA;
+            float _StepSize, _EnableAA;
+
+            float _DistanceMax, _DistancePow, _MinSizeDistanceFactor;
+
+            float _OutlineAA, _OutlineSickness;
 
             v2f vert(appdata v)
             {
@@ -138,27 +152,26 @@ Shader "Unlit/JumpFloodOutline"
                 #else
                     real depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(UV));
                 #endif
-                
+
                 float3 worldPos = ComputeWorldSpacePosition(UV, depth, UNITY_MATRIX_I_VP);
 
+
+                float d = pow(saturate(encodedDepth / _DistanceMax), _DistancePow);
                 // float isBehind = encodedDepth > distance(worldPos, _WorldSpaceCameraPos);
                 float depthDiff = encodedDepth - distance(worldPos, _WorldSpaceCameraPos);
 
-                depthDiff = saturate(depthDiff *100);
+                depthDiff = saturate(depthDiff * 100);
 
                 float distanceField = distance(col.rg, i.vertex.xy / _ScreenParams.xy) * (col.b == 0);
-                float outsideMask = step(.00109, distanceField);
+                float outsideMask = step(.0007, distanceField);
 
-                float innerAA = smoothstep(0, .005, distanceField);
 
-                float a = 0.006;
-                float aa = 1 - smoothstep(a, a + .0035, distanceField);
+                float oS = lerp(_OutlineSickness, _OutlineSickness * _MinSizeDistanceFactor, d);
+                float oA = lerp(_OutlineAA, _OutlineAA * _MinSizeDistanceFactor, d);
+                float aa = 1 - smoothstep(oS, oS + oA, distanceField);
                 aa = pow(aa, 2);
 
-                aa *= innerAA;
-                aa = _EnableAA ? aa : step(0.01,aa);
-                
-                col2 += lerp( 1 - _OutlineColor, _OutlineColor, depthDiff) * outsideMask * aa ;
+                col2 += lerp(_OutlineColor, _OutlineColorInsideObject, depthDiff) * outsideMask * aa;
                 return col2;
                 return lerp(col2, _OutlineColor, outsideMask * aa);
             }
